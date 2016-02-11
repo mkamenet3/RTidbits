@@ -1,0 +1,310 @@
+---
+title: "Plots!"
+author: "Maria Kamenetsky"
+date: "Friday, October 30, 2015"
+output: pdf_document
+header-includes:
+    \usepackage{graphicx}
+
+---
+
+
+#Graphs!
+
+
+```{r eval=FALSE}
+#1) Regular boxplots
+q <- ggplot(df, aes(factor(Pal), SA))
+q + geom_boxplot(outlier.colour="orange", outlier.size=3, aes(fill=factor(Pal))) +  coord_flip() + facet_grid(Dec ~ N)
+
+#2) Boxplots with jittering
+r <- ggplot(data=sub, aes(Conc,DevA))
+r + geom_boxplot(outlier.colour="orange", outlier.size=6, aes(fill=Conc)) +
+    geom_jitter() + coord_flip() + facet_grid(Pop~.) 
+
+```
+
+
+* _GeomPoint_
+```{r eval=FALSE}
+q <- ggplot(BA, aes(SA, DD))
+q + geom_point() +  coord_flip() + facet_grid(Dec ~ Pal) #+  stat_smooth(method=lm, fullrange = TRUE) 
+
+```
+
+
+* _Histogram_
+```{r eval=FALSE}
+#1) histogram on log scale
+ggplot(df, aes(LtoSM)) + geom_histogram() + scale_x_log10()
+
+#2) Facetted Histogram
+ggplot(svN, aes(sv, fill = reg)) + geom_histogram(binwidth=1) + facet_grid(rg ~ reg + soft) 
+
+
+#3) Histogram
+p <- qplot(mathkind, data=classroom, geom="histogram", 
+           xlab="Mathematics Score in Kindergarten",main="Kindergarten Mathematics Score", 
+           binwidth = 10)
+p + geom_histogram(binwidth=10) 
+```
+
+
+* _qplot_
+```{r eval=FALSE}
+qplot(R1,it,  data=z)
+```
+
+
+* _statsmooth_
+```{r eval=FALSE}
+p <- ggplot(z, aes(R2, it))
+p +  scale_y_continuous(limits=c(0,15)) +stat_smooth() 
+#smoothing method (function) to use, eg. lm, glm, gam, loess, rlm. For datasets with n < 1000 default is loess. For datasets with 1000 or more observations defaults to gam, see gam for more details.
+```
+
+
+
+* _bar chart_
+```{r eval=FALSE}
+#Classic Barchart
+qplot(factor(md), data=z, geom="bar", fill=factor(iG))
+
+#Barchart with x-axis labels on 45 degree angle
+q <-qplot(factor(md), data=z, geom="bar", fill=factor(reg)) 
+q + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#Facetted Bar Charts
+ggplot(z, aes(md, fill=factor(reg))) + geom_bar() + facet_grid(rg ~ cf) + coord_flip()
+
+
+```
+
+
+
+* _Histograms_
+```{r eval=FALSE}
+#Facetted Histograms
+ggplot(z, aes(md, fill=factor(reg))) + geom_bar() + facet_grid(rg ~ cf) + coord_flip()
+
+```
+
+
+
+* _Density Plots_
+```{r eval=FALSE}
+#1) Facetted Density Plots
+ggplot(z, aes(salesdensity, fill = cf)) +  geom_density() +   scale_x_continuous(limits=c(0,4)) + facet_grid(cf ~ rg)
+
+#2) Density Plots with 2 Factors - color
+p <- qplot(mathkind, data=classroom, geom="density", 
+           linetype=sex, color=sex,xlab="Mathematics Score in Kindergarten")
+p + geom_density(aes(x=mathkind)) + labs(title="'Mathkind' by 'Sex'")
+```
+
+
+
+* _ScatterPlots_
+```{r eval=FALSE}
+#Scatter plot with point-wise confidence intervals
+p <- qplot(mathgain, mathkind, data=classroom, geom=c("smooth"), 
+           method="loess", xlab="Mathematics Gain for Students in Sample", 
+           ylab="Mathematics Score in Kindergart.", 
+           main="Scatterplot of 'Mathgain' vs. 'Mathkind'")
+p + geom_point() + stat_smooth(se=TRUE) + 
+  geom_smooth(method="loess") + 
+  labs(title="'Mathgain' vs. 'Mathkind'")
+
+#ScatterPlot with Regression Line (and no confidence bands)
+p <- ggplot(classroom, aes(x=mathgain,y=mathkind), 
+            geom_smooth(method="gam", formula = mathkind~mathgain), 
+            stat_smooth(se=FALSE), 
+            xlab="Mathematics Gain for Students in Sample",
+            ylab="Mathematics Score in Kindergarten")
+p + geom_point() + stat_smooth(se=FALSE) + 
+  labs(title="Scatterplot of 'Mathgain' vs. 'Mathkind'") + 
+  geom_smooth(method= "gam")
+
+#Log Scatter Plot with GLM Smoother
+v <- ggplot(ufc, aes(x=log(Height), y = log(Dbh))) + geom_point()
+v + stat_smooth(se=TRUE) + geom_smooth(method="glm", formula = log(Dbh)~log(Height))
+
+```
+
+
+
+* _Dot Plot_
+
+```{r eval=FALSE}
+#Example 1
+eleven <- subset(classroom, schoolid == "11")
+p <- ggplot(eleven, aes(x=classid,y=mathgain),
+            xlab="Classroom Identifier ", 
+            ylab="Gain in Mathematics Score (from Kindergarten to First Grade")
+p + geom_point() + labs(title="'Mathgain' by 'Classid' for SchoolID #11")
+
+
+#Example 2
+ggplot(ufc, aes(x=tr, y = Dbh)) + geom_point() + facet_wrap(~ sp)
+
+```
+
+# _GGMAP_
+* _Getting the Map_
+```{r eval=FALSE}
+map <- get_map(location='united states', zoom=4, maptype='toner')
+ggmap(map) + geom_point(aes(x=longitude, y= latitude, size=(it)), data=z, alpha=0.5)
+#I supplied the long/lat here from my dataset
+```
+
+* _Plotting points_
+```{r eval=FALSE}
+#1) Basic Map
+ggmap(map) + geom_point(aes(x=longitude, y= latitude, color=densityR1, fill=densityR1), data=z, alpha=0.5)
+
+#2) Facetted Map (with colours specified)
+ggmap(map) + geom_point(aes(x=longitude, y= latitude,  colour=it), size = 3, data=z, alpha=0.5) + facet_wrap(cf ~phR) + scale_colour_gradient(limits=c(3, 4), low="blue", high="red")
+
+```
+
+
+
+* _Keep Unit Aspect Ratio_
+```{r eval=FALSE}
++ theme(aspect.ratio = 1)
+
+```
+
+
+* _Change Color Gradient and Point Size_
+```{r eval=FALSE}
+#1) Change color gradient Scale and specify which will be low
++ scale_colour_gradient(limits=c(3,4), low="red")
+
+#2) Change with color brewer
++ scale_colour_brewer(type="div",palette="Set1")
+
+#3) Point size (size=3)
+ggmap(map) + geom_point(aes(x=longitude, y= latitude, color=sv), data=svN, colour="red", size=4)
+```
+
+* _density map_
+```{r eval=FALSE}
+z$cuts <- cut(z$it, breaks=5)
+ggmap(map) + stat_density2d(aes(x=longitude, y= latitude, fill=cuts),
+                            data=z,h=3 ,geom="polygon")
+```
+
+
+
+
+# _Maps with Spatial Polygons_
+```{r eval=FALSE}
+stP$name <- tolower(stP$stL)
+stP <- stP[order(stP$name),] # reorder alpha
+stP <- subset(stP, (name!="hawaii" & name!="alaska"))
+us <- map("state", plot=FALSE, fill=TRUE)
+us.ids <- sapply(strsplit(us$names,":"), function(x) x[1])
+us.sp <- map2SpatialPolygons(us, us.ids, CRS("+proj=longlat + datum=wgs84"))
+
+IDs <- match(stP$name, row.names(us.sp))
+us.spNew <- us.sp[IDs]
+row.names(stP) <- row.names(us.spNew) #these need to match
+us.spdf <- SpatialPolygonsDataFrame(us.spNew, data=as.data.frame(stP)) # rownames of state need to be us.ids
+
+#Plot
+spplot(us.spdf, "reg", main="Title")
+
+#Exclude Obs and Plot
+exclude <- us.spdf[!(us.spdf$stsB==1888 | us.spdf$stsB==1734),]
+sp5 <-spplot(exclude, "stsB",cuts=99, main="Title") 
+
+```
+
+
+* _Plotting Multiple ggplots into a Grid_
+```{r eval=FALSE}
+library(grid)
+library(automap)
+vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
+
+plot1 <- ggplot(z, aes(phR,it)) + geom_boxplot(outlier.colour="orange", outlier.size=3, aes(fill=factor(phR))) +   scale_y_continuous(limits=c(0,75)) + coord_flip() + facet_grid(cf ~ soft) 
+plot2 <- ggplot(z, aes(trR,it)) + geom_boxplot(outlier.colour="orange", outlier.size=3, aes(fill=factor(trR))) + scale_y_continuous(limits=c(0,75)) + coord_flip() + facet_grid(cf ~ soft) 
+plot3 <- ggplot(z, aes(rrR,it)) + geom_boxplot(outlier.colour="orange", outlier.size=3, aes(fill=factor(rrR)))  + scale_y_continuous(limits=c(0,75)) + coord_flip() + facet_grid(cf ~ soft) 
+
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2,2)))
+print(plot1, vp=vplayout(1,1))
+print(plot2, vp=vplayout(1,2))
+print(plot3, vp=vplayout(2,1))
+
+```
+
+##ggplot2 - General Tips and Tricks
+
+* _Suppress Plotting NA's_
+```{r eval=FALSE}
+#outlier.shape=NA
+r + geom_boxplot(outlier.shape=NA, aes(fill=factor(phR))) +  coord_flip() + scale_y_continuous(limits=c(0,2)) + coord_flip() + facet_grid(cf ~ soft) 
+```
+
+* _Setting Limits on X/Y Coords in ggplot_
+```{r eval=FALSE}
+#for y (or x) limits
++ scale_y_continuous(limits=c(0,50))
+
+```
+
+* _Dealing with NA's in DF to Plot_
+```{r eval=FALSE}
+#Solution - create sub data frame without NA's
+
+#Example: use ggplot(na.omit(subset))
+subz <- z[c("it","densityR1", "iG")]
+b <- ggplot(na.omit(subz), aes(factor(densityR1), it))
+b + geom_boxplot(aes(fill=factor(densityR1))) + scale_y_continuous(limits=c(0,100)) + coord_flip() + facet_grid(iG ~.)  #limit to 100
+
+
+```
+
+
+
+#Neat Random Tricks
+
+* _Using texreg Package for Publication-Quality md Output Comparisons_
+```{r eval=FALSE}
+screenreg(list(mod11F, mod11IR, mod11P, mod11Ss)) #this makes output pretty on the screen
+texreg(list(mod11F, mod11IR, mod11P, mod11Ss)) # this makes output pretty in latex
+```
+
+
+* _Other Tables_
+```{r eval=FALSE}
+xtabs(disease/total ~ sex+food, babyfood)
+
+or xtable
+or 
+table
+
+```
+
+
+#Sweet R Packages
+
+* {\bf tidyr} = some data wrangling things; has some SQL style things
+* {\bf ggplot2} = literally the best
+* {\bf gridExtra} = need this if you want to create panels with ggplot that aren't automated (where you can just facet-grid/wrap)
+* {\bf ggmap} = mapping with ggmpa
+* {\bf mapproj} = needed to get maps using spatial polygons
+* {\bf stats} = used for function \textit{aggregate}
+* {\bf texreg} = used for fancy tex output
+* \bf{reshape} = this one makes more sense and is stata-like
+* \bf{reshape2} = this one contains 'melt'
+* \bf{xtable}
+
+
+
+
+
+
+
